@@ -1,5 +1,6 @@
 const Booking = require("../models/Booking");
 const Campground = require("../models/Campground");
+
 //@desc     Get all campgrounds
 //@route    GET /api/v1/campgrounds
 //@access   Public
@@ -70,12 +71,16 @@ exports.getCampgrounds = async (req, res, next) => {
         res.status(400).json({ success: false });
     }
 };
+
 //@desc     Get single campground
 //@route    GET /api/v1/campgrounds/:id
 //@access   Public
 exports.getCampground = async (req, res, next) => {
     try{
-        const campground = await Campground.findById(req.params.id);
+        const campground = await Campground.findById(req.params.id).populate({
+            path:'bookings',
+            select:'apptDate user'
+        });
         if(!campground){
             return res.status(400).json({ success: false });
         }
@@ -84,6 +89,7 @@ exports.getCampground = async (req, res, next) => {
         res.status(400).json({ success: false });
     }
 };
+
 //@desc     Create new campground
 //@route    POST /api/v1/campgrounds
 //@access   Private
@@ -94,6 +100,7 @@ exports.createCampground = async (req, res, next) => {
         data: campground
     });
 };
+
 //@desc     Update campground
 //@route    PUT /api/v1/campgrounds/:id
 //@access   Private
@@ -112,6 +119,7 @@ exports.updateCampground = async (req, res, next) => {
         res.status(400).json({ success: false });
     }
 };
+
 //@desc     Delete campground
 //@route    DELETE /api/v1/campgrounds/:id
 //@access   Private

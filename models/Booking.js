@@ -10,7 +10,7 @@ const BookingSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    hospital: {
+    campground: {
         type: mongoose.Schema.ObjectId,
         ref: 'Campground',
         required: true

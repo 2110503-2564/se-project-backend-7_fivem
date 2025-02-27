@@ -35,6 +35,7 @@ exports.getBookings = async (req, res, next) => {
         return res.status(500).json({ success: false,message:"Cannot find Booking" });
     }
 };
+
 //@desc     Get single booking
 //@route    GET /api/v1/bookings/:id
 //@access   Public
@@ -55,6 +56,7 @@ exports.getBooking = async (req, res, next) => {
         return res.status(500).json({ success: false,message:"Cannot find Booking" });
     }
 };
+
 //@desc     Add booking
 //@route    POST /api/v1/campgrounds/:campgroundId/bookings
 //@access   Private
@@ -85,6 +87,7 @@ exports.addBooking = async (req, res, next) => {
         return res.status(500).json({ success: false,message:"Cannot create Booking" });
     }
 };
+
 //@desc     Update booking
 //@route    PUT /api/v1/bookings/:id
 //@access   Private
@@ -110,6 +113,7 @@ exports.updateBooking = async (req, res, next) => {
         return res.status(500).json({ success: false,message:"Cannot update Booking" });
     }
 };
+
 //@desc     Delete booking
 //@route    DELETE /api/v1/bookings/:id
 //@access   Private
