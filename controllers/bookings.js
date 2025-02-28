@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Campground = require('../models/Campground');
+const schedule = require('node-schedule');
 
 //@desc     Get all bookings
 //@route    GET /api/v1/bookings
@@ -75,6 +76,12 @@ exports.addBooking = async (req, res, next) => {
         //Check for existed booking
         const existedBooking = await Booking.find({ user:req.user.id});
 
+        //Add conditions to prevent bookings on past dates
+        const bookDate = new Date(req.body.apptDate);
+        if (bookDate < new Date()) {
+            return res.status(400).json({ success: false, message: "Cannot book a past date" });
+        }
+
         //If the user is not an admin,they can only create 3 bookings.
         if(req.user.role !== 'admin' && existedBooking.length >= 3){
             return res.status(400).json({ success: false,message:`The user with id of ${req.user.id} has only made 3 bookings` });
@@ -136,3 +143,21 @@ exports.deleteBooking = async (req, res, next) => {
         return res.status(500).json({ success: false,message:"Cannot delete Booking" });
     }
 };
+
+// Additional requirement 
+const deleteExpiredBookings = async () => {
+    const now = new Date();
+    const oneDayAgo = new Date(now);
+    oneDayAgo.setDate(now.getDate() - 1);
+
+    try {
+        // Delete a booking with a `bookDate` that is more than 1 day old.
+        const deleted = await Booking.deleteMany({ bookDate: { $lt: oneDayAgo } });
+        console.log(`Deleted ${deleted.deletedCount} expired bookings.`);
+    } catch (err) {
+        console.error("Error deleting expired bookings:", err);
+    }
+};
+// Set the function to run every day at 00:00.
+schedule.scheduleJob('0 0 * * *', deleteExpiredBookings);
+// Additional requirement 
