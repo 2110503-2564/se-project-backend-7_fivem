@@ -879,7 +879,7 @@
 		},
 		{
 			"key": "TOKEN",
-			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YzA3ZTExMWM5MmZlM2MwNjBiZDE0OCIsImlhdCI6MTc0MDY2ODk2NCwiZXhwIjoxNzQzMjYwOTY0fQ.XWNxk8zzRzVp-XjCY6DZa7_GwhxAOVf1_F64aoT6l_g",
+			"value": "",
 			"type": "string"
 		}
 	]
