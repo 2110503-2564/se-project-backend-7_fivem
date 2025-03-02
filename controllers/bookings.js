@@ -146,16 +146,18 @@ exports.deleteBooking = async (req, res, next) => {
 
 // Additional requirement 
 const deleteExpiredBookings = async () => {
-    const now = new Date();
-    const oneDayAgo = new Date(now);
-    oneDayAgo.setDate(now.getDate() - 1);
-
     try {
-        // Delete a booking with a `bookDate` that is more than 1 day old.
-        const deleted = await Booking.deleteMany({ bookDate: { $lt: oneDayAgo } });
-        console.log(`Deleted ${deleted.deletedCount} expired bookings.`);
+        const now = new Date();
+        const expiredBookings = await Booking.find({ apptDate: { $lt: now } });
+
+        if (expiredBookings.length > 0) {
+            await Booking.deleteMany({ apptDate: { $lt: now } });
+            console.log(`Deleted ${expiredBookings.length} expired bookings.`);
+        } else {
+            console.log('No expired bookings found.');
+        }
     } catch (err) {
-        console.error("Error deleting expired bookings:", err);
+        console.error('Error deleting expired bookings:', err);
     }
 };
 // Set the function to run every day at 00:00.
