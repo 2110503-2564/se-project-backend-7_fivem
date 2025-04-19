@@ -1,0 +1,1763 @@
+{
+	"info": {
+		"_postman_id": "6e027841-da6a-4b60-ab7d-c9aadc3da698",
+		"name": "Campground Booking",
+		"description": "Backend API for booking campgrounds timeslots, including campgrounds, users, and bookings.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42417242"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register Regular User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Invalid Register\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"//Random Email\r",
+									"function generateRandomString(length) {\r",
+									"    let result = '';\r",
+									"    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';\r",
+									"    const charactersLength = characters.length;\r",
+									"    for (let i = 0; i < length; i++) {\r",
+									"        result += characters.charAt(Math.floor(Math.random() * charactersLength));\r",
+									"    }\r",
+									"    return result;\r",
+									"}\r",
+									"\r",
+									"const randomEmail = `${generateRandomString(10)}@email.com`;\r",
+									"\r",
+									"pm.globals.set(\"global_email\", randomEmail);\r",
+									"\r",
+									"\r",
+									"function generateRandomNumber(length) {\r",
+									"    let result = '';\r",
+									"    const characters = '0123456789';\r",
+									"    const charactersLength = characters.length;\r",
+									"    for (let i = 0; i < length; i++) {\r",
+									"        result += characters.charAt(Math.floor(Math.random() * charactersLength));\r",
+									"    }\r",
+									"    return result;\r",
+									"}\r",
+									"\r",
+									"//Random Phone Number\r",
+									"function generateRandomPhoneNumber() {\r",
+									"    const prefix = '0' + ['6', '8', '9'][Math.floor(Math.random() * 3)];\r",
+									"    return prefix + generateRandomNumber(8);\r",
+									"}\r",
+									"\r",
+									"const randomPhoneNumber = generateRandomPhoneNumber();\r",
+									"pm.globals.set(\"global_tel\", randomPhoneNumber);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"email\":\"{{global_email}}\",\r\n    \"tel\":\"{{global_tel}}\",\r\n    \"password\":\"12345678\",\r\n    \"role\":\"user\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/register/",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"User Login\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"email\":\"this is not a valid email\",\r\n    \"tel\":\"this is not a valid phone number\",\r\n    \"password\":\"12345678\",\r\n    \"role\":\"user\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/register/",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"TOKEN\",pm.response.json().token)\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get All Campgrounds\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"{{global_email}}\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/login",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"TOKEN\",null);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Admin Login\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/logout",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"TOKEN\",pm.response.json().token)\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get Logged in User\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"admin@gmail.com\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/login",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Logged in User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"const new_user_id =response.data._id;\r",
+									"\r",
+									"pm.globals.set(\"global_user_ID\",new_user_id)\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get All Bookings\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3YjZjY2Y1NGNkZDYxMmUxNmE1ZGZmNCIsImlhdCI6MTc0MDA1NjAxNiwiZXhwIjoxNzQyNjQ4MDE2fQ.DlCdJlhWuTULPugBoe_KHtEpO90IT42lkAgYCOPpHMc",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/me",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"TOKEN\", null);\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(null);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/logout",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Campgrounds",
+			"item": [
+				{
+					"name": "Get All Campgrounds",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"\r",
+									"pm.test(\"There are some campgrounds!!\",()=>{\r",
+									"        pm.expect(response.count).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get Single Campground\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								""
+							],
+							"query": [
+								{
+									"key": "province",
+									"value": "กรุงเทพมหานคร",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Fetch all campgrounds from database."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Campground",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Add Booking 1\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_ID",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_ID"
+							],
+							"variable": [
+								{
+									"key": "campground_ID",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						},
+						"description": "Fetch a campground from database."
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Campground",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"const new_campground_id =response.data.id;\r",
+									"\r",
+									"pm.globals.set(\"global_campground_ID\",new_campground_id)\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Update Single Campground\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\",\r\n    \"address\":\"Campground\",\r\n    \"district\":\"Bangkok\",\r\n    \"province\":\"Nonthaburi\",\r\n    \"postalcode\":\"10110\",\r\n    \"tel\":\"02-8369999\",\r\n    \"region\":\"กรุงเทพมหานคร (ฺBangkok)\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								""
+							]
+						},
+						"description": "Create new campground to database."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Single Campground",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.execution.setNextRequest(\"Delete Single Campground\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\":\"{{$randomFullName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_ID",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_ID"
+							],
+							"variable": [
+								{
+									"key": "campground_ID",
+									"value": "{{global_campground_ID}}"
+								}
+							]
+						},
+						"description": "Update a campground from database."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Single Campground",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(null);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_ID",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_ID"
+							],
+							"variable": [
+								{
+									"key": "campground_ID",
+									"value": "{{global_campground_ID}}"
+								}
+							]
+						},
+						"description": "Delete a campground from database."
+					},
+					"response": []
+				}
+			],
+			"description": "Campgrounds CRUD functionality"
+		},
+		{
+			"name": "Bookings",
+			"item": [
+				{
+					"name": "Add Booking 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"const new_booking_id = response.data._id;\r",
+									"\r",
+									"pm.globals.set(\"Booking_id_1\",new_booking_id)\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Add Booking 2\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2025-12-01T12:00:00.000Z\",\r\n    \"user\":\"{{global_user_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Booking 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"const new_booking_id = response.data._id;\r",
+									"\r",
+									"pm.globals.set(\"global_booking_ID\",new_booking_id)\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Add Booking 3\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2025-12-02T12:00:00.000Z\",\r\n    \"user\":\"{{global_user_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Booking 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"const new_booking_id = response.data._id;\r",
+									"\r",
+									"pm.globals.set(\"global_booking_ID\",new_booking_id)\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Add Booking 4\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2025-12-03T12:00:00.000Z\",\r\n    \"user\":\"{{global_user_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Booking 4",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get Booking by id\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2025-12-04T12:00:00.000Z\",\r\n    \"user\":\"{{global_user_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"\r",
+									"pm.execution.setNextRequest(\"User Get All Bookings\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings/:id",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{Booking_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Get All Bookings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"\r",
+									"pm.test(\"There are some bookings!!\",()=>{\r",
+									"        pm.expect(response.count).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Update Own Booking\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Own Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Delete Own Booking\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2026-12-31T12:00:00.000+00:00\",\r\n    \"campground\":\"67c06e26e543dc9c1514d6b0\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings/:booking_id",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings",
+								":booking_id"
+							],
+							"variable": [
+								{
+									"key": "booking_id",
+									"value": "{{global_booking_ID}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Own Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"User Logout\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings/:id",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{global_booking_ID}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Bookings",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"\r",
+									"pm.test(\"There are some bookings!!\",()=>{\r",
+									"        pm.expect(response.count).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Get Booking for Campground\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Booking for Campground",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"const response = pm.response.json();\r",
+									"console.log(response);\r",
+									"\r",
+									"pm.test(\"There are some bookings!!\",()=>{\r",
+									"        pm.expect(response.count).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Update Booking\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Delete Booking\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2028-12-31T12:00:00.000+00:00\",\r\n    \"campground\":\"{{Booking_id_1}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings/:booking_id",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings",
+								":booking_id"
+							],
+							"variable": [
+								{
+									"key": "booking_id",
+									"value": "{{Booking_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.execution.setNextRequest(\"Create New Campground\");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/bookings/:id",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"bookings",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{Booking_id_1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Additional Functions",
+			"item": [
+				{
+					"name": "Login(Extra)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"TOKEN\",pm.response.json().token)\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"admin@gmail.com\",\r\n    \"password\":\"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/auth/login",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Normal Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"2025-12-01T12:00:00.000Z\",\r\n    \"user\":\"67c317dabdbb1eaf0bbe0eb6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Expired Booking",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"1990-12-01T12:00:00.000Z\",\r\n    \"user\":\"67c317dabdbb1eaf0bbe0eb6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking that expires in 5 seconds",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let futureTime = new Date(Date.now() + 5000).toISOString();\r",
+									"pm.environment.set(\"Futuretime\", futureTime);\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "JSON Type",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"apptDate\":\"{{Futuretime}}\",\r\n    \"user\":\"67c317dabdbb1eaf0bbe0eb6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/campgrounds/:campground_id/bookings",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campgrounds",
+								":campground_id",
+								"bookings"
+							],
+							"variable": [
+								{
+									"key": "campground_id",
+									"value": "67c06e26e543dc9c1514d6b0"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "TOKEN",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
