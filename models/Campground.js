@@ -31,6 +31,11 @@ const CampgroundSchema = new mongoose.Schema({
     region: {
         type: String,
         required: [true,'Please add a region']
+    },
+    // เพิ่ม price
+    price: {
+        type: Number,
+        required: [true,'Please add a price']
     }
 },{
     toJSON: { virtuals: true },
