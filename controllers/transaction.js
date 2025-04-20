@@ -1,26 +1,4 @@
-const Transaction = require('../models/Transaction');
-
-// @desc    Create new transaction
-// @route   POST /api/v1/transactions
-// @access  Private
-exports.addTransaction = async (req, res) => {
-  try {
-    const { booking, campground, paymentMethod, amount } = req.body;
-
-    const transaction = await Transaction.create({
-      user: req.user.id,
-      booking,
-      campground,
-      paymentMethod,
-      amount,
-      paidAt: new Date()
-    });
-
-    res.status(201).json({ success: true, data: transaction });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-};
+const Transaction = require("../models/Transaction");
 
 // @desc    Get single transaction by ID
 // @route   GET /api/v1/transactions/:id
@@ -29,11 +7,13 @@ exports.getTransaction = async (req, res) => {
   try {
     const transaction = await Transaction.findOne({
       _id: req.params.id,
-      user: req.user.id
-    }).populate('booking campground paymentMethod');
+      user: req.user.id,
+    }).populate("booking campground paymentMethod");
 
     if (!transaction) {
-      return res.status(404).json({ success: false, error: 'Transaction not found' });
+      return res
+        .status(404)
+        .json({ success: false, error: "Transaction not found" });
     }
 
     res.status(200).json({ success: true, data: transaction });
@@ -49,9 +29,11 @@ exports.getTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find({ user: req.user.id })
       .sort({ transactionDate: -1 })
-      .populate('booking campground paymentMethod');
+      .populate("booking campground paymentMethod");
 
-    res.status(200).json({ success: true, count: transactions.length, data: transactions });
+    res
+      .status(200)
+      .json({ success: true, count: transactions.length, data: transactions });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
   }

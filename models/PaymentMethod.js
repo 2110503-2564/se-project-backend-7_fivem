@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const bankNames = [
   "KBank", // กสิกรไทย
@@ -34,17 +34,28 @@ const PaymentMethodSchema = new mongoose.Schema({
       return this.method === "credit_card";
     },
   },
-  // Bank account fields
+  cardFingerprint: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true,
+  },
   bankAccountNumber: {
     type: String,
     select: false,
     match: [
-      /^\d{10,12}$/, // 10 ถึง 12 ตัวเลขเท่านั้น
+      /^\d{10,12}$/,
       "Please provide a valid Thai bank account number (10-12 digits)",
     ],
     required: function () {
       return this.method === "bank_account";
     },
+  },
+  bankAccountFingerprint: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true,
   },
   bankName: {
     type: String,
@@ -60,29 +71,25 @@ const PaymentMethodSchema = new mongoose.Schema({
   },
 });
 
-// Encrypt sensitive fields before saving
+// 🔥 ใช้ SHA-256 ทำ Fingerprint ก่อน save
 PaymentMethodSchema.pre("save", async function (next) {
   if (this.method === "credit_card" && this.isModified("cardNumber")) {
-    const salt = await bcrypt.genSalt(10);
-    this.cardNumber = await bcrypt.hash(this.cardNumber, salt);
+    this.cardFingerprint = crypto
+      .createHash("sha256")
+      .update(this.cardNumber)
+      .digest("hex");
   }
 
   if (this.method === "bank_account" && this.isModified("bankAccountNumber")) {
-    const salt = await bcrypt.genSalt(10);
-    this.bankAccountNumber = await bcrypt.hash(this.bankAccountNumber, salt);
+    this.bankAccountFingerprint = crypto
+      .createHash("sha256")
+      .update(this.bankAccountNumber)
+      .digest("hex");
   }
 
-  //next();
+  next();
 });
 
-// Compare methods
-/*
-PaymentMethodSchema.methods.matchCardNumber = async function (enteredNumber) {
-    return await bcrypt.compare(enteredNumber, this.cardNumber);
-};
-
-PaymentMethodSchema.methods.matchBankAccountNumber = async function (enteredNumber) {
-    return await bcrypt.compare(enteredNumber, this.bankAccountNumber);
-};*/
+// (ไม่ต้องมี matchCardNumber / matchBankAccountNumber method แล้ว เพราะหาแบบ query ได้เลย)
 
 module.exports = mongoose.model("PaymentMethod", PaymentMethodSchema);

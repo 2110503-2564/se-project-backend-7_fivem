@@ -38,15 +38,43 @@ exports.getPaymentMethod = async (req, res) => {
 // @desc    Add a new payment method
 // @route   POST /api/payment-methods
 // @access  Private
+const crypto = require("crypto");
+
 exports.addPaymentMethod = async (req, res) => {
   try {
+    let existing;
+
+    if (req.body.method === "credit_card" && req.body.cardNumber) {
+      const fingerprint = crypto
+        .createHash("sha256")
+        .update(req.body.cardNumber)
+        .digest("hex");
+      existing = await PaymentMethod.findOne({ cardFingerprint: fingerprint });
+    }
+
+    if (req.body.method === "bank_account" && req.body.bankAccountNumber) {
+      const fingerprint = crypto
+        .createHash("sha256")
+        .update(req.body.bankAccountNumber)
+        .digest("hex");
+      existing = await PaymentMethod.findOne({
+        bankAccountFingerprint: fingerprint,
+      });
+    }
+
+    if (existing) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Payment method already exists" });
+    }
+
     const data = {
       user: req.user.id,
       method: req.body.method,
       cardNumber: req.body.cardNumber,
       bankAccountNumber: req.body.bankAccountNumber,
       bankName: req.body.bankName,
-      paypalEmail: req.body.paypalEmail,
+      label: req.body.label,
     };
 
     const paymentMethod = await PaymentMethod.create(data);
@@ -71,16 +99,12 @@ exports.updatePaymentMethod = async (req, res) => {
         .json({ success: false, error: "Payment method not found" });
     }
 
-    // เช็กว่า user คนนี้เป็นเจ้าของหรือเปล่า
     if (method.user.toString() !== req.user.id) {
       return res.status(401).json({ success: false, error: "Not authorized" });
     }
 
-    // === Apply Updates ===
     if (req.body.method && req.body.method !== method.method) {
       method.method = req.body.method;
-
-      // ถ้าเปลี่ยน method ต้อง clear fields ที่ไม่เกี่ยวข้อง
       if (req.body.method === "credit_card") {
         method.bankAccountNumber = undefined;
         method.bankName = undefined;
@@ -90,13 +114,20 @@ exports.updatePaymentMethod = async (req, res) => {
       }
     }
 
-    // อัปเดตข้อมูล
     if (req.body.cardNumber) {
       method.cardNumber = req.body.cardNumber;
+      method.cardFingerprint = crypto
+        .createHash("sha256")
+        .update(req.body.cardNumber)
+        .digest("hex");
     }
 
     if (req.body.bankAccountNumber) {
       method.bankAccountNumber = req.body.bankAccountNumber;
+      method.bankAccountFingerprint = crypto
+        .createHash("sha256")
+        .update(req.body.bankAccountNumber)
+        .digest("hex");
     }
 
     if (req.body.bankName) {
@@ -107,7 +138,7 @@ exports.updatePaymentMethod = async (req, res) => {
       method.label = req.body.label;
     }
 
-    await method.save(); // trigger pre-save encryption
+    await method.save();
 
     res.status(200).json({ success: true, data: method });
   } catch (err) {
