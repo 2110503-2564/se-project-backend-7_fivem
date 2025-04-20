@@ -20,6 +20,9 @@ connectDB();
 const campgrounds = require('./routes/campgrounds');
 const bookings = require('./routes/bookings');
 const auth = require('./routes/auth');
+// เพิ่ม
+const paymentmethod = require('./routes/paymentmethod');
+const transaction = require('./routes/transaction');
 
 const app = express();
 
@@ -74,6 +77,8 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 app.use('/api/v1/bookings', bookings);
 app.use('/api/v1/campgrounds', campgrounds);
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/paymentmethod', paymentmethod);
+app.use('/api/v1/transaction', transaction);
 
 const PORT = process.env.PORT || 5000;
 
