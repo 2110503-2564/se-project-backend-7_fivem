@@ -63,12 +63,12 @@ const PaymentMethodSchema = new mongoose.Schema({
 // Encrypt sensitive fields before saving
 PaymentMethodSchema.pre("save", async function (next) {
   if (this.method === "credit_card" && this.isModified("cardNumber")) {
-    const salt = "$2b$10$123456789012345678901u";
+    const salt = await bcrypt.genSalt(10);
     this.cardNumber = await bcrypt.hash(this.cardNumber, salt);
   }
 
   if (this.method === "bank_account" && this.isModified("bankAccountNumber")) {
-    const salt = "$2b$10$123456789012345678901u";
+    const salt = await bcrypt.genSalt(10);
     this.bankAccountNumber = await bcrypt.hash(this.bankAccountNumber, salt);
   }
 
