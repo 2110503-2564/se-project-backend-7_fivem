@@ -8,6 +8,6 @@ const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
 
 router.route("/").get(protect, authorize("admin", "user"), getTransactions);
-router.route("/:id").get(protect, authorize("admin,user"), getTransaction);
+router.route("/:id").get(protect, authorize("admin", "user"), getTransaction);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const Booking = require("../models/Booking");
 const Campground = require("../models/Campground");
 const schedule = require("node-schedule");
+const Transaction = require("../models/Transaction");
 
 //@desc     Get all bookings
 //@route    GET /api/v1/bookings
@@ -102,11 +103,17 @@ exports.addBooking = async (req, res, next) => {
         message: `The user with id of ${req.user.id} has only made 3 bookings`,
       });
     }
+    if (!req.body.paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment method is required",
+      });
+    }
 
-    // ✅ สร้าง booking
+    // สร้าง booking
     const booking = await Booking.create(req.body);
 
-    // ✅ สร้าง transaction ทันทีหลัง booking สำเร็จ
+    // สร้าง transaction ทันทีหลัง booking สำเร็จ
     const transaction = await Transaction.create({
       user: req.user.id,
       booking: booking._id,
@@ -186,7 +193,9 @@ exports.deleteBooking = async (req, res, next) => {
       });
     }
 
+    await Transaction.deleteOne({ booking: booking._id });
     await booking.deleteOne();
+
     res.status(200).json({ success: true, data: {} });
   } catch (err) {
     console.log(err);
@@ -215,4 +224,3 @@ const deleteExpiredBookings = async () => {
 // Set the function to run every day at 00:00.
 schedule.scheduleJob("0 0 * * *", deleteExpiredBookings);
 // Additional requirement
-

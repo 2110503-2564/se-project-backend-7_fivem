@@ -22,19 +22,27 @@ exports.getTransaction = async (req, res) => {
   }
 };
 
-// @desc    Get all transactions of the logged-in user
+// @desc    Get all transactions of the logged-in user (or all if admin)
 // @route   GET /api/v1/transactions
 // @access  Private
 exports.getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.find({ user: req.user.id })
+    // ถ้าเป็น admin => ไม่ filter ด้วย user
+    const query = req.user.role === "admin" ? {} : { user: req.user.id };
+
+    const transactions = await Transaction.find(query)
       .sort({ transactionDate: -1 })
       .populate("booking campground paymentMethod");
 
-    res
-      .status(200)
-      .json({ success: true, count: transactions.length, data: transactions });
+    res.status(200).json({
+      success: true,
+      count: transactions.length,
+      data: transactions,
+    });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({
+      success: false,
+      error: err.message,
+    });
   }
 };
