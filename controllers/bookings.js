@@ -119,7 +119,7 @@ exports.addBooking = async (req, res, next) => {
       booking: booking._id,
       campground: req.params.campgroundId,
       paymentMethod: req.body.paymentMethod, // ต้องแน่ใจว่าใน req.body มี paymentMethod มาด้วยนะ
-      amount: req.body.amount, // และ amount เช่นกัน
+      amount: campground.price, // และ amount เช่นกัน
       paidAt: new Date(),
     });
 
@@ -192,7 +192,7 @@ exports.deleteBooking = async (req, res, next) => {
         message: `User ${req.user.id} is not authorized to delete this booking`,
       });
     }
-
+    
     await Transaction.deleteOne({ booking: booking._id });
     await booking.deleteOne();
 
