@@ -20,6 +20,10 @@ const PaymentMethodSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  name: {
+    type: String,
+    required: [true, "Please provide a name for the payment method"],
+  },
   method: {
     type: String,
     enum: ["credit_card", "bank_account"],
@@ -71,7 +75,7 @@ const PaymentMethodSchema = new mongoose.Schema({
   },
 });
 
-// 🔥 ใช้ SHA-256 ทำ Fingerprint ก่อน save
+//ใช้ SHA-256 ทำ Fingerprint ก่อน save
 PaymentMethodSchema.pre("save", async function (next) {
   if (this.method === "credit_card" && this.isModified("cardNumber")) {
     this.cardFingerprint = crypto

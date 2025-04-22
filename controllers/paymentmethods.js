@@ -70,6 +70,7 @@ exports.addPaymentMethod = async (req, res) => {
 
     const data = {
       user: req.user.id,
+      name: req.body.name,
       method: req.body.method,
       cardNumber: req.body.cardNumber,
       bankAccountNumber: req.body.bankAccountNumber,
@@ -108,9 +109,11 @@ exports.updatePaymentMethod = async (req, res) => {
       if (req.body.method === "credit_card") {
         method.bankAccountNumber = undefined;
         method.bankName = undefined;
+        method.bankAccountFingerprint = undefined;
       }
       if (req.body.method === "bank_account") {
         method.cardNumber = undefined;
+        method.cardFingerprint = undefined;
       }
     }
 
@@ -134,8 +137,8 @@ exports.updatePaymentMethod = async (req, res) => {
       method.bankName = req.body.bankName;
     }
 
-    if (req.body.label) {
-      method.label = req.body.label;
+    if (req.body.name) {
+      method.name = req.body.name;
     }
 
     await method.save();
