@@ -192,7 +192,7 @@ exports.deleteBooking = async (req, res, next) => {
         message: `User ${req.user.id} is not authorized to delete this booking`,
       });
     }
-    
+
     await Transaction.deleteOne({ booking: booking._id });
     await booking.deleteOne();
 
@@ -222,5 +222,9 @@ const deleteExpiredBookings = async () => {
   }
 };
 // Set the function to run every day at 00:00.
-schedule.scheduleJob("0 0 * * *", deleteExpiredBookings);
+//
+
+if (process.env.NODE_ENV !== "test") {
+  schedule.scheduleJob("0 0 * * *", deleteExpiredBookings);
+}
 // Additional requirement

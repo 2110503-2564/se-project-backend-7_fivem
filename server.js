@@ -1,28 +1,32 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cookieParser = require('cookie-parser');
-const connectDB = require('./config/db');
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUI = require('swagger-ui-express');
-const mongoSanitize = require('express-mongo-sanitize');
-const helmet = require('helmet');
-const { xss } = require('express-xss-sanitizer');
-const rateLimit = require('express-rate-limit');
-const hpp = require('hpp');
-const cors = require('cors');
+const express = require("express");
+const dotenv = require("dotenv");
+const cookieParser = require("cookie-parser");
+const connectDB = require("./config/db");
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUI = require("swagger-ui-express");
+const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
+const { xss } = require("express-xss-sanitizer");
+const rateLimit = require("express-rate-limit");
+const hpp = require("hpp");
+const cors = require("cors");
 
 //load env vars
-dotenv.config({ path: './config/config.env' });
+if (process.env.NODE_ENV === "test") {
+  dotenv.config({ path: "./config/.env.test" });
+} else {
+  dotenv.config({ path: "./config/config.env" });
+}
 
 connectDB();
 
 //Route files
-const campgrounds = require('./routes/campgrounds');
-const bookings = require('./routes/bookings');
-const auth = require('./routes/auth');
+const campgrounds = require("./routes/campgrounds");
+const bookings = require("./routes/bookings");
+const auth = require("./routes/auth");
 // เพิ่ม
-const paymentmethod = require('./routes/paymentmethod');
-const transaction = require('./routes/transaction');
+const paymentmethod = require("./routes/paymentmethod");
+const transaction = require("./routes/transaction");
 
 const app = express();
 
@@ -43,8 +47,8 @@ app.use(xss());
 
 //Rate Limiting
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000, // 10 mins
-    max: 100
+  windowMs: 10 * 60 * 1000, // 10 mins
+  max: 100,
 });
 app.use(limiter);
 
@@ -56,35 +60,44 @@ app.use(cors());
 
 //Swagger options
 const swaggerOptions = {
-    swaggerDefinition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'Campground Booking API',
-            version: '1.0.0',
-            description: 'A simple Express Campground Booking API',
-        },
-        servers: [{
-            url: 'http://localhost:5003/api/v1'
-        }],
+  swaggerDefinition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Campground Booking API",
+      version: "1.0.0",
+      description: "A simple Express Campground Booking API",
     },
-    apis: ['./routes/*.js']
+    servers: [
+      {
+        url: "http://localhost:5003/api/v1",
+      },
+    ],
+  },
+  apis: ["./routes/*.js"],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 //Mount routers
-app.use('/api/v1/bookings', bookings);
-app.use('/api/v1/campgrounds', campgrounds);
-app.use('/api/v1/auth', auth);
-app.use('/api/v1/paymentmethod', paymentmethod);
-app.use('/api/v1/transaction', transaction);
+app.use("/api/v1/bookings", bookings);
+app.use("/api/v1/campgrounds", campgrounds);
+app.use("/api/v1/auth", auth);
+app.use("/api/v1/paymentmethod", paymentmethod);
+app.use("/api/v1/transaction", transaction);
 
-const PORT = process.env.PORT || 5000;
+module.exports = app;
 
-const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  const server = app.listen(PORT, () => {
+    console.log(
+      `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+    );
+  });
 
-process.on('unhandledRejection', (err, promise) => {
+  process.on("unhandledRejection", (err) => {
     console.log(`Error: ${err.message}`);
     server.close(() => process.exit(1));
-});
+  });
+}
