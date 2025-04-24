@@ -1,8 +1,14 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { getPaymentMethods, getPaymentMethod, addPaymentMethod, updatePaymentMethod, deletePaymentMethod } = require('../controllers/paymentmethods');
+const {
+  getPaymentMethods,
+  getPaymentMethod,
+  addPaymentMethod,
+  updatePaymentMethod,
+  deletePaymentMethod,
+} = require("../controllers/paymentmethods");
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require("../middleware/auth");
 
 /**
  * @swagger
@@ -53,7 +59,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
- * /api/payment-methods:
+ * /paymentmethod:
  *   get:
  *     summary: Get all payment methods of the authenticated user
  *     tags: [Payment Methods]
@@ -105,19 +111,6 @@ const { protect, authorize } = require('../middleware/auth');
  *                 type: string
  *                 description: Required if method is credit_card (13-19 digits)
  *                 example: "4111111111111111"
- *               bankAccountNumber:
- *                 type: string
- *                 description: Required if method is bank_account (10-12 digits)
- *                 example: "1234567890"
- *               bankName:
- *                 type: string
- *                 enum: [KBank, SCB, BBL, Krungsri, KTB, TTB, BAAC, GSB, CIMB, UOB]
- *                 description: Required if method is bank_account
- *                 example: "KBank"
- *               label:
- *                 type: string
- *                 description: Optional label for the payment method
- *                 example: "Primary Card"
  *             required:
  *               - name
  *               - method
@@ -144,7 +137,85 @@ const { protect, authorize } = require('../middleware/auth');
 
 /**
  * @swagger
- * /api/payment-methods/{id}:
+ * /paymentmethod:
+ *   get:
+ *     summary: Get all payment methods of the authenticated user
+ *     tags: [Payment Methods]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 count:
+ *                   type: integer
+ *                   example: 3
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/PaymentMethod'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ *
+ *   post:
+ *     summary: Add a new payment method
+ *     tags: [Payment Methods]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "My Credit Card"
+ *               method:
+ *                 type: string
+ *                 enum: [credit_card, bank_account]
+ *                 example: "credit_card"
+ *               cardNumber:
+ *                 type: string
+ *                 description: Required if method is credit_card (13-19 digits)
+ *                 example: "4111111111111111"
+ *             required:
+ *               - name
+ *               - method
+ *     responses:
+ *       201:
+ *         description: Payment method created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/PaymentMethod'
+ *       400:
+ *         description: Bad request (invalid data or payment method already exists)
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+
+/**
+ * @swagger
+ * /paymentmethod/{id}:
  *   get:
  *     summary: Get a specific payment method by ID
  *     tags: [Payment Methods]
@@ -279,7 +350,14 @@ const { protect, authorize } = require('../middleware/auth');
  *       bearerFormat: JWT
  */
 
-router.route('/').get(protect, authorize('admin', 'user'), getPaymentMethods).post(protect, authorize('admin', 'user'), addPaymentMethod);
-router.route('/:id').get(protect, authorize('admin', 'user'), getPaymentMethod).put(protect, authorize('admin', 'user'), updatePaymentMethod).delete(protect, authorize('admin', 'user'), deletePaymentMethod);
+router
+  .route("/")
+  .get(protect, authorize("admin", "user"), getPaymentMethods)
+  .post(protect, authorize("admin", "user"), addPaymentMethod);
+router
+  .route("/:id")
+  .get(protect, authorize("admin", "user"), getPaymentMethod)
+  .put(protect, authorize("admin", "user"), updatePaymentMethod)
+  .delete(protect, authorize("admin", "user"), deletePaymentMethod);
 
 module.exports = router;

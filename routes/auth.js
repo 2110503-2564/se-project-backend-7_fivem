@@ -14,17 +14,7 @@ const { protect } = require("../middleware/auth");
 
 /**
  * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- */
-
-/**
- * @swagger
- * /api/v1/auth/register:
+ * /auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
@@ -60,7 +50,7 @@ const { protect } = require("../middleware/auth");
 
 /**
  * @swagger
- * /api/v1/auth/login:
+ * //auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [Auth]
@@ -89,7 +79,7 @@ const { protect } = require("../middleware/auth");
 
 /**
  * @swagger
- * /api/v1/auth/me:
+ * /auth/me:
  *   get:
  *     summary: Get the current logged in user
  *     tags: [Auth]
@@ -104,7 +94,7 @@ const { protect } = require("../middleware/auth");
 
 /**
  * @swagger
- * /api/v1/auth/logout:
+ * /auth/logout:
  *   get:
  *     summary: Log out the current user
  *     tags: [Auth]
@@ -119,4 +109,3 @@ router.get("/me", protect, getMe);
 router.get("/logout", logout);
 
 module.exports = router;
-

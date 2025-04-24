@@ -63,7 +63,7 @@ const { protect, authorize } = require("../middleware/auth");
  *         - campground
  *         - paymentMethod
  *         - amount
- * 
+ *
  *     User:
  *       type: object
  *       properties:
@@ -76,14 +76,14 @@ const { protect, authorize } = require("../middleware/auth");
  *         email:
  *           type: string
  *           example: "john@example.com"
- * 
+ *
  *     Booking:
  *       type: object
  *       properties:
  *         _id:
  *           type: string
  *           example: "607f1f77bcf86cd799439022"
- * 
+ *
  *     Campground:
  *       type: object
  *       properties:
@@ -97,7 +97,7 @@ const { protect, authorize } = require("../middleware/auth");
 
 /**
  * @swagger
- * /api/v1/transactions:
+ * /transaction:
  *   get:
  *     summary: Get all transactions (user's transactions or all if admin)
  *     tags: [Transactions]
@@ -131,7 +131,7 @@ const { protect, authorize } = require("../middleware/auth");
 
 /**
  * @swagger
- * /api/v1/transactions/{id}:
+ * /transaction/{id}:
  *   get:
  *     summary: Get a single transaction by ID
  *     tags: [Transactions]
