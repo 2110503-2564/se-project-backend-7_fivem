@@ -50,7 +50,7 @@ const { protect } = require("../middleware/auth");
 
 /**
  * @swagger
- * //auth/login:
+ * /auth/login:
  *   post:
  *     summary: Login a user
  *     tags: [Auth]

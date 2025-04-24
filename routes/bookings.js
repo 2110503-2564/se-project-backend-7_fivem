@@ -1,39 +1,48 @@
-const express = require('express');
-const { getBookings, getBooking, addBooking, updateBooking, deleteBooking } = require('../controllers/bookings');
+const express = require("express");
+const {
+  getBookings,
+  getBooking,
+  addBooking,
+  updateBooking,
+  deleteBooking,
+} = require("../controllers/bookings");
 
 const router = express.Router({ mergeParams: true });
 
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize } = require("../middleware/auth");
 
 /**
  * @swagger
+ * tags:
+ *   name: Booking
+ *   description: Booking management
+
  * components:
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+
  *   schemas:
  *     Booking:
  *       type: object
  *       properties:
- *         _id:
- *           type: string
- *           example: 5f8d04b3ab35b30017a6b12a
  *         apptDate:
  *           type: string
  *           format: date-time
- *           example: "2023-12-25T00:00:00.000Z"
- *         user:
- *           type: string
- *           example: 5f8d04b3ab35b30017a6b12b
+ *           description: Appointment date for the booking
+ *           example: "2027-12-25T00:00:00.000Z"
  *         campground:
  *           type: string
- *           example: 5f8d04b3ab35b30017a6b12c
+ *           description: Name of the campground
+ *           example: "Green Hill Camp"
  *         createdAt:
  *           type: string
  *           format: date-time
- *           example: "2023-10-25T10:00:00.000Z"
+ *           description: Booking creation timestamp
+ *           example: "2027-10-25T10:00:00.000Z"
+
  *     ErrorResponse:
  *       type: object
  *       properties:
@@ -303,10 +312,14 @@ const { protect, authorize } = require('../middleware/auth');
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 
-
-
-router.route('/').get(protect, getBookings).post(protect, authorize('admin', 'user'), addBooking);
-router.route('/:id').get(protect, getBooking).put(protect, authorize('admin', 'user'), updateBooking).delete(protect, authorize('admin', 'user'), deleteBooking);
+router
+  .route("/")
+  .get(protect, getBookings)
+  .post(protect, authorize("admin", "user"), addBooking);
+router
+  .route("/:id")
+  .get(protect, getBooking)
+  .put(protect, authorize("admin", "user"), updateBooking)
+  .delete(protect, authorize("admin", "user"), deleteBooking);
 
 module.exports = router;
-

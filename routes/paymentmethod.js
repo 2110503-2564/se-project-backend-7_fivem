@@ -40,7 +40,13 @@ const { protect, authorize } = require("../middleware/auth");
  *           type: string
  *           enum: [credit_card, bank_account]
  *           description: Type of payment method
- *           example: "credit_card"
+ *           examples:
+ *             credit_card:
+ *               summary: Payment via credit card
+ *               value: credit_card
+ *             bank_account:
+ *               summary: Payment via bank account
+ *               value: bank_account
  *         bankName:
  *           type: string
  *           enum: [KBank, SCB, BBL, Krungsri, KTB, TTB, BAAC, GSB, CIMB, UOB]

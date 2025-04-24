@@ -82,7 +82,6 @@ const { protect, authorize } = require("../middleware/auth");
  *       properties:
  *         _id:
  *           type: string
- *           example: "607f1f77bcf86cd799439022"
  *
  *     Campground:
  *       type: object
