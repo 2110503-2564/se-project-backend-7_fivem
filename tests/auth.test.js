@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const request = require("supertest");
 const dotenv = require("dotenv");
 const app = require("../server");
+const Usrer = require("../models/User");
 
 dotenv.config({ path: "./config/.env.test" });
 
@@ -23,37 +24,65 @@ afterAll(async () => {
 describe("Auth Routes", () => {
   let token;
 
-  it("should register a new user", async () => {
-    const res = await request(app).post("/api/v1/auth/register").send({
-      name: "Test User",
-      email: "test@example.com",
-      tel: "0812345678",
-      password: "password123",
-    });
+  const testUser = {
+    name: "Test User",
+    email: "test@example.com",
+    tel: "0812345678",
+    password: "password123",
+  };
 
+  it("should register a new user", async () => {
+    const res = await request(app).post("/api/v1/auth/register").send(testUser);
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("token");
+  });
+
+  it("should not register with existing email", async () => {
+    const res = await request(app).post("/api/v1/auth/register").send(testUser);
+    expect(res.statusCode).toBe(400);
+    expect(res.body.success).toBe(false);
   });
 
   it("should login with valid credentials", async () => {
     const res = await request(app).post("/api/v1/auth/login").send({
-      email: "test@example.com",
-      password: "password123",
+      email: testUser.email,
+      password: testUser.password,
     });
-
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty("token");
-    token = res.body.token; // สำหรับใช้ใน getMe
+    token = res.body.token;
   });
 
-  it("should get current logged in user", async () => {
+  it("should not login with invalid email", async () => {
+    const res = await request(app).post("/api/v1/auth/login").send({
+      email: "wrong@example.com",
+      password: testUser.password,
+    });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.msg).toBe("Invalid credentials");
+  });
+
+  it("should not login with wrong password", async () => {
+    const res = await request(app).post("/api/v1/auth/login").send({
+      email: testUser.email,
+      password: "wrongpassword",
+    });
+    expect(res.statusCode).toBe(401);
+    expect(res.body.msg).toBe("Invalid credentials");
+  });
+
+  it("should return current user data with valid token", async () => {
     const res = await request(app)
       .get("/api/v1/auth/me")
       .set("Authorization", `Bearer ${token}`);
-
     expect(res.statusCode).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.email).toBe("test@example.com");
+    expect(res.body.data.email).toBe(testUser.email);
+  });
+
+  it("should block access to /me without token", async () => {
+    const res = await request(app).get("/api/v1/auth/me");
+    expect(res.statusCode).toBe(401);
+    expect(res.body.msg).toMatch(/not authorize/i);
   });
 
   it("should logout the user", async () => {
