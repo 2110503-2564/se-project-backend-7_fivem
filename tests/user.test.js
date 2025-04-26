@@ -16,7 +16,6 @@ const testUser = {
 };
 
 beforeAll(async () => {
-  console.log(process.env.MONGO_URI);
   await mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -39,6 +38,8 @@ describe("User Routes", () => {
       password: testUser.password,
     });
     expect(res1.statusCode).toBe(400);
+
+    console.log(res1.body);
 
     // Test missing password
     const res2 = await request(app).post("/api/v1/auth/login").send({
