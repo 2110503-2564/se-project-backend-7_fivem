@@ -51,7 +51,7 @@ exports.getBooking = async (req, res, next) => {
       select: "name province tel",
     });
     if (!booking) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
         message: `No Booking with the id of ${req.params.id}`,
       });

@@ -17,7 +17,7 @@ const testCampground = {
   postalcode: "12345",
   tel: "0812345678",
   region: "Test Region",
-  price: 1000
+  price: 1000,
 };
 
 const testAdmin = {
@@ -25,11 +25,10 @@ const testAdmin = {
   email: "admin@campgroundtest.com",
   tel: "0812345677",
   password: "adminPassword123",
-  role: "admin"
+  role: "admin",
 };
 
 let adminToken;
-let testCampgroundId;
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URI, {
@@ -37,10 +36,8 @@ beforeAll(async () => {
     useUnifiedTopology: true,
   });
 
-  // Clean up existing data
-  await User.deleteMany({});
-  await Campground.deleteMany({});
-  await Booking.deleteMany({});
+  // Clean up existing test admin if exists
+  await User.deleteOne({ email: testAdmin.email });
 
   // Create test admin and get token
   const admin = await User.create(testAdmin);
@@ -48,26 +45,41 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // Clean up test admin
+  await User.deleteOne({ email: testAdmin.email });
+
   await mongoose.connection.close();
 });
 
 describe("Campground Controller", () => {
+  let campgroundIds = [];
+  let bookingIds = [];
+
+  afterEach(async () => {
+    // Delete bookings created during tests
+    if (bookingIds.length > 0) {
+      await Booking.deleteMany({ _id: { $in: bookingIds } });
+      bookingIds = [];
+    }
+
+    // Delete campgrounds created during tests
+    if (campgroundIds.length > 0) {
+      await Campground.deleteMany({ _id: { $in: campgroundIds } });
+      campgroundIds = [];
+    }
+  });
+
   describe("getCampgrounds", () => {
     beforeEach(async () => {
-      await Campground.create(testCampground);
-    });
-
-    afterEach(async () => {
-      await Campground.deleteMany({});
+      const campground = await Campground.create(testCampground);
+      campgroundIds.push(campground._id);
     });
 
     it("should get all campgrounds with default pagination", async () => {
-      const res = await request(app)
-        .get("/api/v1/campgrounds")
-        .expect(200);
+      const res = await request(app).get("/api/v1/campgrounds").expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.data.length).toBe(1);
+      expect(res.body.data.length).toBeGreaterThan(0);
     });
 
     it("should handle select fields", async () => {
@@ -81,8 +93,13 @@ describe("Campground Controller", () => {
     });
 
     it("should handle sorting", async () => {
-      await Campground.create({ ...testCampground, name: "Another Campground", price: 500 });
-      
+      const anotherCampground = await Campground.create({
+        ...testCampground,
+        name: "Another Campground",
+        price: 500,
+      });
+      campgroundIds.push(anotherCampground._id);
+
       const res = await request(app)
         .get("/api/v1/campgrounds?sort=price")
         .expect(200);
@@ -93,7 +110,11 @@ describe("Campground Controller", () => {
     it("should handle pagination", async () => {
       // Create multiple campgrounds for pagination testing
       for (let i = 0; i < 30; i++) {
-        await Campground.create({ ...testCampground, name: `Campground ${i}` });
+        const campground = await Campground.create({
+          ...testCampground,
+          name: `Campground ${i}`,
+        });
+        campgroundIds.push(campground._id);
       }
 
       const res = await request(app)
@@ -115,23 +136,22 @@ describe("Campground Controller", () => {
   });
 
   describe("getCampground", () => {
+    let testCampgroundId;
+
     beforeEach(async () => {
       const campground = await Campground.create(testCampground);
       testCampgroundId = campground._id;
-    });
-
-    afterEach(async () => {
-      await Campground.deleteMany({});
-      await Booking.deleteMany({});
+      campgroundIds.push(testCampgroundId);
     });
 
     it("should get a single campground with bookings", async () => {
       // Create a booking for this campground
-      await Booking.create({
+      const booking = await Booking.create({
         campground: testCampgroundId,
         user: new mongoose.Types.ObjectId(),
-        apptDate: new Date()
+        apptDate: new Date(),
       });
+      bookingIds.push(booking._id);
 
       const res = await request(app)
         .get(`/api/v1/campgrounds/${testCampgroundId}`)
@@ -160,10 +180,6 @@ describe("Campground Controller", () => {
   });
 
   describe("createCampground", () => {
-    afterEach(async () => {
-      await Campground.deleteMany({});
-    });
-
     it("should create a new campground", async () => {
       const res = await request(app)
         .post("/api/v1/campgrounds")
@@ -173,6 +189,8 @@ describe("Campground Controller", () => {
 
       expect(res.body.success).toBe(true);
       expect(res.body.data.name).toBe(testCampground.name);
+
+      campgroundIds.push(res.body.data._id);
     });
 
     it("should require authentication", async () => {
@@ -183,26 +201,15 @@ describe("Campground Controller", () => {
 
       expect(res.body.success).toBe(false);
     });
-
-    // it("should validate required fields", async () => {
-    //   const res = await request(app)
-    //     .post("/api/v1/campgrounds")
-    //     .set("Authorization", `Bearer ${adminToken}`)
-    //     .send({ name: "Missing fields" })
-    //     .expect(400);
-
-    //   expect(res.body.success).toBe(false);
-    // });
   });
 
   describe("updateCampground", () => {
+    let testCampgroundId;
+
     beforeEach(async () => {
       const campground = await Campground.create(testCampground);
       testCampgroundId = campground._id;
-    });
-
-    afterEach(async () => {
-      await Campground.deleteMany({});
+      campgroundIds.push(testCampgroundId);
     });
 
     it("should update a campground", async () => {
@@ -217,25 +224,15 @@ describe("Campground Controller", () => {
       expect(res.body.data.price).toBe(1500);
     });
 
-    // it("should return 400 for invalid updates", async () => {
-    //     const updates = { price: negro };
-    //   const res = await request(app)
-    //     .put(`/api/v1/campgrounds/${testCampgroundId}`)
-    //     .set("Authorization", `Bearer ${adminToken}`)
-    //     .send(updates)
-    //     .expect(400);
-
-    //   expect(res.body.success).toBe(false);
-    // });
     it("should handle errors during update", async () => {
-        // Force an error by passing an invalid ID format
-        const res = await request(app)
-          .put("/api/v1/campgrounds/invalidid")
-          .set("Authorization", `Bearer ${adminToken}`)
-          .expect(400);
-  
-        expect(res.body.success).toBe(false);
-      });
+      // Force an error by passing an invalid ID format
+      const res = await request(app)
+        .put("/api/v1/campgrounds/invalidid")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
 
     it("should return 400 for non-existent campground", async () => {
       const fakeId = new mongoose.Types.ObjectId();
@@ -250,21 +247,22 @@ describe("Campground Controller", () => {
   });
 
   describe("deleteCampground", () => {
+    let testCampgroundId;
+
     beforeEach(async () => {
       const campground = await Campground.create(testCampground);
       testCampgroundId = campground._id;
+      campgroundIds.push(testCampgroundId);
     });
-    afterEach(async () => {
-        await Campground.deleteMany({});
-      });
 
     it("should delete a campground and its bookings", async () => {
       // Create a booking for this campground
       const booking = await Booking.create({
         campground: testCampgroundId,
         user: new mongoose.Types.ObjectId(),
-        apptDate: new Date()
+        apptDate: new Date(),
       });
+      bookingIds.push(booking._id);
 
       const res = await request(app)
         .delete(`/api/v1/campgrounds/${testCampgroundId}`)
