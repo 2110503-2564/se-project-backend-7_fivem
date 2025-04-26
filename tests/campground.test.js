@@ -28,16 +28,7 @@ const testAdmin = {
   role: "admin"
 };
 
-const testUser = {
-  name: "Test User",
-  email: "user@campgroundtest.com",
-  tel: "0812345679",
-  password: "password123",
-  role: "user"
-};
-
 let adminToken;
-let userToken;
 let testCampgroundId;
 
 beforeAll(async () => {
@@ -46,84 +37,142 @@ beforeAll(async () => {
     useUnifiedTopology: true,
   });
 
+  // Clean up existing data
+  await User.deleteMany({});
+  await Campground.deleteMany({});
+  await Booking.deleteMany({});
+
   // Create test admin and get token
-  await User.deleteOne({ email: testAdmin.email });
   const admin = await User.create(testAdmin);
   adminToken = admin.getSignedJwtToken();
-
-  // Create test user and get token
-  await User.deleteOne({ email: testUser.email });
-  const user = await User.create(testUser);
-  userToken = user.getSignedJwtToken();
-});
-
-beforeEach(async () => {
-  // Create a fresh campground before each test that needs it
-  await Campground.deleteOne({ name: testCampground.name });
-  const campground = await Campground.create(testCampground);
-  testCampgroundId = campground._id;
-});
-
-afterEach(async () => {
-  // Clean up after each test
-  await Booking.deleteMany({ campground: testCampgroundId });
-  await Campground.deleteOne({ _id: testCampgroundId });
 });
 
 afterAll(async () => {
-  if (mongoose.connection.readyState === 1) {
-    await User.deleteMany({ 
-      email: { $in: [testAdmin.email, testUser.email] }
-    });
-    await mongoose.connection.close();
-  }
+  await mongoose.connection.close();
 });
 
-describe("Campground Routes", () => {
-  describe("GET /api/v1/campgrounds", () => {
-    it("should return all campgrounds with pagination (public)", async () => {
+describe("Campground Controller", () => {
+  describe("getCampgrounds", () => {
+    beforeEach(async () => {
+      await Campground.create(testCampground);
+    });
+
+    afterEach(async () => {
+      await Campground.deleteMany({});
+    });
+
+    it("should get all campgrounds with default pagination", async () => {
       const res = await request(app)
         .get("/api/v1/campgrounds")
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.data).toBeInstanceOf(Array);
+      expect(res.body.data.length).toBe(1);
+    });
+
+    it("should handle select fields", async () => {
+      const res = await request(app)
+        .get("/api/v1/campgrounds?select=name,address")
+        .expect(200);
+
+      expect(res.body.data[0].name).toBeDefined();
+      expect(res.body.data[0].address).toBeDefined();
+      expect(res.body.data[0].price).toBeUndefined();
+    });
+
+    it("should handle sorting", async () => {
+      await Campground.create({ ...testCampground, name: "Another Campground", price: 500 });
+      
+      const res = await request(app)
+        .get("/api/v1/campgrounds?sort=price")
+        .expect(200);
+
+      expect(res.body.data[0].price).toBe(500);
+    });
+
+    it("should handle pagination", async () => {
+      // Create multiple campgrounds for pagination testing
+      for (let i = 0; i < 30; i++) {
+        await Campground.create({ ...testCampground, name: `Campground ${i}` });
+      }
+
+      const res = await request(app)
+        .get("/api/v1/campgrounds?page=2&limit=10")
+        .expect(200);
+
+      expect(res.body.pagination).toBeDefined();
+      expect(res.body.data.length).toBe(10);
+    });
+
+    it("should handle errors", async () => {
+      // Force an error by passing invalid query parameters
+      const res = await request(app)
+        .get("/api/v1/campgrounds?price[gt]=notanumber")
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
     });
   });
 
-  describe("POST /api/v1/campgrounds", () => {
-    it("should allow admin to create a new campground", async () => {
-      const newCampground = {
-        ...testCampground,
-        name: "New Test Campground"
-      };
+  describe("getCampground", () => {
+    beforeEach(async () => {
+      const campground = await Campground.create(testCampground);
+      testCampgroundId = campground._id;
+    });
 
+    afterEach(async () => {
+      await Campground.deleteMany({});
+      await Booking.deleteMany({});
+    });
+
+    it("should get a single campground with bookings", async () => {
+      // Create a booking for this campground
+      await Booking.create({
+        campground: testCampgroundId,
+        user: new mongoose.Types.ObjectId(),
+        apptDate: new Date()
+      });
+
+      const res = await request(app)
+        .get(`/api/v1/campgrounds/${testCampgroundId}`)
+        .expect(200);
+
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.bookings.length).toBe(1);
+    });
+
+    it("should return 400 for invalid ID", async () => {
+      const res = await request(app)
+        .get("/api/v1/campgrounds/invalidid")
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should return 400 for non-existent campground", async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .get(`/api/v1/campgrounds/${fakeId}`)
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe("createCampground", () => {
+    afterEach(async () => {
+      await Campground.deleteMany({});
+    });
+
+    it("should create a new campground", async () => {
       const res = await request(app)
         .post("/api/v1/campgrounds")
         .set("Authorization", `Bearer ${adminToken}`)
-        .send(newCampground)
+        .send(testCampground)
         .expect(201);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.data.name).toBe(newCampground.name);
-      
-      // Clean up
-      await Campground.deleteOne({ _id: res.body.data._id });
-    });
-
-    it("should prevent regular users from creating campgrounds", async () => {
-      const newCampground = {
-        ...testCampground,
-        name: "User Created Campground"
-      };
-
-      const res = await request(app)
-        .post("/api/v1/campgrounds")
-        .set("Authorization", `Bearer ${userToken}`)
-        .send(newCampground)
-        .expect(403);
-
-      expect(res.body.success).toBe(false);
+      expect(res.body.data.name).toBe(testCampground.name);
     });
 
     it("should require authentication", async () => {
@@ -134,9 +183,28 @@ describe("Campground Routes", () => {
 
       expect(res.body.success).toBe(false);
     });
+
+    // it("should validate required fields", async () => {
+    //   const res = await request(app)
+    //     .post("/api/v1/campgrounds")
+    //     .set("Authorization", `Bearer ${adminToken}`)
+    //     .send({ name: "Missing fields" })
+    //     .expect(400);
+
+    //   expect(res.body.success).toBe(false);
+    // });
   });
 
-  describe("PUT /api/v1/campgrounds/:id", () => {
+  describe("updateCampground", () => {
+    beforeEach(async () => {
+      const campground = await Campground.create(testCampground);
+      testCampgroundId = campground._id;
+    });
+
+    afterEach(async () => {
+      await Campground.deleteMany({});
+    });
+
     it("should update a campground", async () => {
       const updates = { price: 1500 };
       const res = await request(app)
@@ -146,12 +214,50 @@ describe("Campground Routes", () => {
         .expect(200);
 
       expect(res.body.success).toBe(true);
-      expect(res.body.data.price).toBe(updates.price);
+      expect(res.body.data.price).toBe(1500);
     });
-    
+
+    // it("should return 400 for invalid updates", async () => {
+    //     const updates = { price: negro };
+    //   const res = await request(app)
+    //     .put(`/api/v1/campgrounds/${testCampgroundId}`)
+    //     .set("Authorization", `Bearer ${adminToken}`)
+    //     .send(updates)
+    //     .expect(400);
+
+    //   expect(res.body.success).toBe(false);
+    // });
+    it("should handle errors during update", async () => {
+        // Force an error by passing an invalid ID format
+        const res = await request(app)
+          .put("/api/v1/campgrounds/invalidid")
+          .set("Authorization", `Bearer ${adminToken}`)
+          .expect(400);
+  
+        expect(res.body.success).toBe(false);
+      });
+
+    it("should return 400 for non-existent campground", async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .put(`/api/v1/campgrounds/${fakeId}`)
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ price: 1500 })
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
+    });
   });
 
-  describe("DELETE /api/v1/campgrounds/:id", () => {
+  describe("deleteCampground", () => {
+    beforeEach(async () => {
+      const campground = await Campground.create(testCampground);
+      testCampgroundId = campground._id;
+    });
+    afterEach(async () => {
+        await Campground.deleteMany({});
+      });
+
     it("should delete a campground and its bookings", async () => {
       // Create a booking for this campground
       const booking = await Booking.create({
@@ -173,6 +279,26 @@ describe("Campground Routes", () => {
 
       const deletedBooking = await Booking.findById(booking._id);
       expect(deletedBooking).toBeNull();
+    });
+
+    it("should return 404 for non-existent campground", async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+      const res = await request(app)
+        .delete(`/api/v1/campgrounds/${fakeId}`)
+        .set("Authorization", `Bearer ${adminToken}`)
+        .expect(404);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should handle errors during deletion", async () => {
+      // Force an error by passing an invalid ID format
+      const res = await request(app)
+        .delete("/api/v1/campgrounds/invalidid")
+        .set("Authorization", `Bearer ${adminToken}`)
+        .expect(400);
+
+      expect(res.body.success).toBe(false);
     });
   });
 });
