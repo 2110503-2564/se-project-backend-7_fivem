@@ -6,7 +6,7 @@
     "jtest": "jest",
     "test": "cross-env NODE_ENV=test jest --runInBand --reporters=default --reporters=jest-html-reporter",
     "test-single": "cross-env NODE_ENV=test jest",
-    "test-coverage": "cross-env NODE_ENV=test jest --watchAll --coverage",
+    "test-coverage": "cross-env NODE_ENV=test jest --watchAll --coverage --runInBand",
     "dev": "nodemon server.js"
   },
   "author": "",

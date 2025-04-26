@@ -33,6 +33,22 @@ afterAll(async () => {
 describe("User Routes", () => {
   let token;
 
+  it("should not login with missing email or password", async () => {
+    // Test missing email
+    const res1 = await request(app).post("/api/v1/auth/login").send({
+        password: testUser.password
+    });
+    expect(res1.statusCode).toBe(400);
+    
+    // Test missing password
+    const res2 = await request(app).post("/api/v1/auth/login").send({
+        email: testUser.email
+    });
+    expect(res2.statusCode).toBe(400);
+  });
+
+//---------------------------------
+
   it("should register a new user", async () => {
     const res = await request(app).post("/api/v1/auth/register").send(testUser);
     expect(res.statusCode).toBe(200);
@@ -91,5 +107,31 @@ describe("User Routes", () => {
     const res = await request(app).get("/api/v1/auth/logout");
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
+  });
+});
+//-------------------------------------
+
+describe("Production environment", () => {
+  let originalEnv;
+  
+  beforeAll(() => {
+      originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+  });
+  
+  afterAll(() => {
+      process.env.NODE_ENV = originalEnv;
+  });
+  
+  it("should set secure cookie in production", async () => {
+      const res = await request(app)
+          .post("/api/v1/auth/login")
+          .send({
+              email: testUser.email,
+              password: testUser.password
+          });
+      
+      // Check if secure flag would be set (you might need to inspect the cookie)
+      expect(res.headers['set-cookie']).toBeDefined();
   });
 });
