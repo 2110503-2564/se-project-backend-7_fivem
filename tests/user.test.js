@@ -1,13 +1,22 @@
-// tests/auth.test.js
+// tests/user.test.js
 const mongoose = require("mongoose");
 const request = require("supertest");
-const dotenv = require("dotenv");
-const app = require("../server");
-const Usrer = require("../models/User");
 
+const dotenv = require("dotenv");
 dotenv.config({ path: "./config/.env.test" });
 
+const app = require("../server");
+const User = require("../models/User");
+
+const testUser = {
+  name: "Test User",
+  email: "test@example.com",
+  tel: "0812345681",
+  password: "password123",
+};
+
 beforeAll(async () => {
+  console.log(process.env.MONGO_URI);
   await mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -16,20 +25,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (mongoose.connection.readyState === 1) {
-    await mongoose.connection.db.dropDatabase();
+    await User.deleteOne({ email: testUser.email });
     await mongoose.connection.close();
   }
 });
 
-describe("Auth Routes", () => {
+describe("User Routes", () => {
   let token;
-
-  const testUser = {
-    name: "Test User",
-    email: "test@example.com",
-    tel: "0812345678",
-    password: "password123",
-  };
 
   it("should register a new user", async () => {
     const res = await request(app).post("/api/v1/auth/register").send(testUser);
