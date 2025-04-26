@@ -27,7 +27,8 @@ exports.register = async (req, res, next) => {
 //@route    POST /api/v1/auth/login
 //@access   Public
 exports.login = async (req, res, next) => {
-    try{
+
+    // delete try catch
         const { email, password } = req.body;
 
         //Validate email and password
@@ -48,9 +49,7 @@ exports.login = async (req, res, next) => {
         }
         //Create token
         sendTokenResponse(user, 200, res);
-    }catch(err){
-        return res.status(401).json({success:false, msg:'Cannot convert email or password to string'});
-    }
+    
 };
 
 //Get token from model, create cookie and send response
