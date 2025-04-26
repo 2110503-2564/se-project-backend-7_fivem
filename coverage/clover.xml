@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1745664100571" clover="3.2.0">
-  <project timestamp="1745664100571" name="All files">
-    <metrics statements="397" coveredstatements="223" conditionals="124" coveredconditionals="33" methods="39" coveredmethods="17" elements="560" coveredelements="273" complexity="0" loc="397" ncloc="397" packages="6" files="18" classes="18"/>
+<coverage generated="1745666898500" clover="3.2.0">
+  <project timestamp="1745666898500" name="All files">
+    <metrics statements="397" coveredstatements="239" conditionals="124" coveredconditionals="40" methods="39" coveredmethods="19" elements="560" coveredelements="298" complexity="0" loc="397" ncloc="397" packages="6" files="18" classes="18"/>
     <package name="se-project-backend-7_fivem">
       <metrics statements="47" coveredstatements="40" conditionals="6" coveredconditionals="2" methods="3" coveredmethods="0"/>
       <file name="server.js" path="C:\Users\USER\Documents\SE\se-project-backend-7_fivem\server.js">
@@ -71,7 +71,7 @@
       </file>
     </package>
     <package name="se-project-backend-7_fivem.controllers">
-      <metrics statements="247" coveredstatements="92" conditionals="100" coveredconditionals="21" methods="25" coveredmethods="10"/>
+      <metrics statements="247" coveredstatements="109" conditionals="100" coveredconditionals="29" methods="25" coveredmethods="12"/>
       <file name="auth.js" path="C:\Users\USER\Documents\SE\se-project-backend-7_fivem\controllers\auth.js">
         <metrics statements="31" coveredstatements="31" conditionals="10" coveredconditionals="10" methods="5" coveredmethods="5"/>
         <line num="1" count="3" type="stmt"/>
@@ -188,64 +188,64 @@
         <line num="228" count="0" type="stmt"/>
       </file>
       <file name="campgrounds.js" path="C:\Users\USER\Documents\SE\se-project-backend-7_fivem\controllers\campgrounds.js">
-        <metrics statements="57" coveredstatements="40" conditionals="18" coveredconditionals="10" methods="7" coveredmethods="5"/>
+        <metrics statements="57" coveredstatements="57" conditionals="18" coveredconditionals="18" methods="7" coveredmethods="7"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
         <line num="7" count="3" type="stmt"/>
-        <line num="11" count="1" type="stmt"/>
-        <line num="14" count="1" type="stmt"/>
-        <line num="17" count="4" type="stmt"/>
-        <line num="20" count="1" type="stmt"/>
-        <line num="23" count="1" type="stmt"/>
-        <line num="26" count="1" type="stmt"/>
-        <line num="29" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="31" count="0" type="stmt"/>
-        <line num="34" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="35" count="0" type="stmt"/>
-        <line num="36" count="0" type="stmt"/>
-        <line num="38" count="1" type="stmt"/>
-        <line num="42" count="1" type="cond" truecount="2" falsecount="0"/>
-        <line num="43" count="1" type="cond" truecount="2" falsecount="0"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="47" count="1" type="stmt"/>
-        <line num="48" count="1" type="stmt"/>
-        <line num="49" count="1" type="stmt"/>
-        <line num="51" count="1" type="stmt"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="55" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="56" count="0" type="stmt"/>
-        <line num="62" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="63" count="0" type="stmt"/>
-        <line num="69" count="1" type="stmt"/>
-        <line num="71" count="0" type="stmt"/>
+        <line num="11" count="5" type="stmt"/>
+        <line num="14" count="5" type="stmt"/>
+        <line num="17" count="20" type="stmt"/>
+        <line num="20" count="5" type="stmt"/>
+        <line num="23" count="5" type="stmt"/>
+        <line num="26" count="5" type="stmt"/>
+        <line num="29" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="34" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="35" count="1" type="stmt"/>
+        <line num="36" count="1" type="stmt"/>
+        <line num="38" count="4" type="stmt"/>
+        <line num="42" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="43" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="44" count="5" type="stmt"/>
+        <line num="45" count="5" type="stmt"/>
+        <line num="47" count="5" type="stmt"/>
+        <line num="48" count="5" type="stmt"/>
+        <line num="49" count="5" type="stmt"/>
+        <line num="51" count="5" type="stmt"/>
+        <line num="53" count="4" type="stmt"/>
+        <line num="55" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="56" count="1" type="stmt"/>
+        <line num="62" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="69" count="4" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
         <line num="78" count="3" type="stmt"/>
-        <line num="79" count="0" type="stmt"/>
-        <line num="80" count="0" type="stmt"/>
-        <line num="84" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="85" count="0" type="stmt"/>
-        <line num="87" count="0" type="stmt"/>
-        <line num="89" count="0" type="stmt"/>
+        <line num="79" count="3" type="stmt"/>
+        <line num="80" count="3" type="stmt"/>
+        <line num="84" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="85" count="1" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="89" count="1" type="stmt"/>
         <line num="96" count="3" type="stmt"/>
         <line num="97" count="1" type="stmt"/>
         <line num="98" count="1" type="stmt"/>
         <line num="107" count="3" type="stmt"/>
-        <line num="108" count="1" type="stmt"/>
-        <line num="109" count="1" type="stmt"/>
-        <line num="114" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="115" count="0" type="stmt"/>
+        <line num="108" count="3" type="stmt"/>
+        <line num="109" count="3" type="stmt"/>
+        <line num="114" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="115" count="1" type="stmt"/>
         <line num="117" count="1" type="stmt"/>
-        <line num="119" count="0" type="stmt"/>
+        <line num="119" count="1" type="stmt"/>
         <line num="126" count="3" type="stmt"/>
-        <line num="127" count="1" type="stmt"/>
-        <line num="128" count="1" type="stmt"/>
-        <line num="129" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="130" count="0" type="stmt"/>
+        <line num="127" count="3" type="stmt"/>
+        <line num="128" count="3" type="stmt"/>
+        <line num="129" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="130" count="1" type="stmt"/>
         <line num="132" count="1" type="stmt"/>
         <line num="133" count="1" type="stmt"/>
         <line num="135" count="1" type="stmt"/>
-        <line num="138" count="0" type="stmt"/>
+        <line num="138" count="1" type="stmt"/>
       </file>
       <file name="paymentmethods.js" path="C:\Users\USER\Documents\SE\se-project-backend-7_fivem\controllers\paymentmethods.js">
         <metrics statements="67" coveredstatements="7" conditionals="36" coveredconditionals="0" methods="5" coveredmethods="0"/>
@@ -336,28 +336,28 @@
       </file>
     </package>
     <package name="se-project-backend-7_fivem.middleware">
-      <metrics statements="19" coveredstatements="17" conditionals="10" coveredconditionals="10" methods="3" coveredmethods="3"/>
+      <metrics statements="19" coveredstatements="16" conditionals="10" coveredconditionals="9" methods="3" coveredmethods="3"/>
       <file name="auth.js" path="C:\Users\USER\Documents\SE\se-project-backend-7_fivem\middleware\auth.js">
-        <metrics statements="19" coveredstatements="17" conditionals="10" coveredconditionals="10" methods="3" coveredmethods="3"/>
+        <metrics statements="19" coveredstatements="16" conditionals="10" coveredconditionals="9" methods="3" coveredmethods="3"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
         <line num="5" count="3" type="stmt"/>
-        <line num="8" count="7" type="cond" truecount="4" falsecount="0"/>
-        <line num="9" count="5" type="stmt"/>
-        <line num="13" count="7" type="cond" truecount="4" falsecount="0"/>
+        <line num="8" count="10" type="cond" truecount="4" falsecount="0"/>
+        <line num="9" count="8" type="stmt"/>
+        <line num="13" count="10" type="cond" truecount="4" falsecount="0"/>
         <line num="14" count="2" type="stmt"/>
-        <line num="17" count="5" type="stmt"/>
-        <line num="19" count="5" type="stmt"/>
-        <line num="21" count="5" type="stmt"/>
-        <line num="23" count="5" type="stmt"/>
-        <line num="25" count="5" type="stmt"/>
+        <line num="17" count="8" type="stmt"/>
+        <line num="19" count="8" type="stmt"/>
+        <line num="21" count="8" type="stmt"/>
+        <line num="23" count="8" type="stmt"/>
+        <line num="25" count="8" type="stmt"/>
         <line num="27" count="0" type="stmt"/>
         <line num="28" count="0" type="stmt"/>
         <line num="32" count="3" type="stmt"/>
         <line num="33" count="39" type="stmt"/>
-        <line num="34" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="37" count="3" type="stmt"/>
+        <line num="34" count="7" type="cond" truecount="1" falsecount="1"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="37" count="7" type="stmt"/>
       </file>
     </package>
     <package name="se-project-backend-7_fivem.models">
@@ -405,10 +405,10 @@
         <line num="3" count="3" type="stmt"/>
         <line num="5" count="3" type="stmt"/>
         <line num="48" count="3" type="stmt"/>
-        <line num="49" count="7" type="stmt"/>
-        <line num="50" count="7" type="stmt"/>
+        <line num="49" count="6" type="stmt"/>
+        <line num="50" count="6" type="stmt"/>
         <line num="54" count="3" type="stmt"/>
-        <line num="55" count="8" type="stmt"/>
+        <line num="55" count="7" type="stmt"/>
         <line num="61" count="3" type="stmt"/>
         <line num="62" count="6" type="stmt"/>
         <line num="65" count="3" type="stmt"/>
