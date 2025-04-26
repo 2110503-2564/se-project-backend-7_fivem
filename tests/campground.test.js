@@ -148,6 +148,7 @@ describe("Campground Routes", () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.price).toBe(updates.price);
     });
+    
   });
 
   describe("DELETE /api/v1/campgrounds/:id", () => {
