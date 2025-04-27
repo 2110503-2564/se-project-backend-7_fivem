@@ -28,7 +28,16 @@ const testAdmin = {
   role: "admin",
 };
 
+const testUser = {
+  name: "Test User",
+  email: "user@campgroundtest.com",
+  tel: "0812345678",
+  password: "UserPassword123",
+  role: "user",
+}
+
 let adminToken;
+let userToken
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URI, {
@@ -38,15 +47,19 @@ beforeAll(async () => {
 
   // Clean up existing test admin if exists
   await User.deleteOne({ email: testAdmin.email });
+  await User.deleteOne({ email: testUser.email});
 
   // Create test admin and get token
   const admin = await User.create(testAdmin);
+  const user = await User.create(testUser);
   adminToken = admin.getSignedJwtToken();
+  userToken = user.getSignedJwtToken();
 });
 
 afterAll(async () => {
   // Clean up test admin
   await User.deleteOne({ email: testAdmin.email });
+  await User.deleteOne({ email: testUser.email });
 
   await mongoose.connection.close();
 });
@@ -198,6 +211,16 @@ describe("Campground Controller", () => {
         .post("/api/v1/campgrounds")
         .send(testCampground)
         .expect(401);
+
+      expect(res.body.success).toBe(false);
+    });
+
+    it("should return 403 for unauthorized access from user", async () => {
+      const res = await request(app)
+        .post("/api/v1/campgrounds")
+        .set("Authorization", `Bearer ${userToken}`)
+        .send(testCampground)
+        .expect(403);
 
       expect(res.body.success).toBe(false);
     });
