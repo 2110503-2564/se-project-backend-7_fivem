@@ -23,6 +23,8 @@ beforeAll(async () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
+    await User.deleteMany({});
+    await PaymentMethod.deleteMany({});
 
   // Register and login test user
   const registerRes = await request(app)
@@ -39,8 +41,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (mongoose.connection.readyState === 1) {
-    await User.deleteOne({ email: testUser.email });
-    await PaymentMethod.deleteMany({ user: userId });
+    await User.deleteMany({});
+    await PaymentMethod.deleteMany({});
     await mongoose.connection.close();
   }
 });
@@ -258,8 +260,7 @@ describe("Payment Method Routes", () => {
 
     beforeEach(async () => {
       // Create a test payment method
-      await PaymentMethod.deleteMany({ user: userId });
-
+      await PaymentMethod.deleteMany({});
       const method = await PaymentMethod.create({
         user: userId,
         name: "Test Card",
@@ -323,6 +324,27 @@ describe("Payment Method Routes", () => {
       expect(res.body.data.bankName).toBeUndefined();
     });
 
+    it("should return 400 if payment failed", async () => {
+      const bankMethod = await PaymentMethod.create({
+        user: userId,
+        name: "Test Bank",
+        method: "bank_account",
+        bankAccountNumber: "1234567890",
+        bankName: "KBank",
+      });
+
+      const res = await request(app)
+        .put(`/api/v1/paymentmethod/${bankMethod._id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+          method: "credit_card",
+          name: "Updated Name",
+        });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.body.success).toBe(false);
+    });
+
     it("should return 404 if payment method not found", async () => {
       const fakeId = new mongoose.Types.ObjectId();
       const res = await request(app)
@@ -367,6 +389,7 @@ describe("Payment Method Routes", () => {
       expect(res.body.success).toBe(false);
     });
   });
+  //------------------------------------------
 
   describe("DELETE /api/paymentmethod/:id", () => {
     let testMethodId;

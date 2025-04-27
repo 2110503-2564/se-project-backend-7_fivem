@@ -22,6 +22,7 @@
     "express-xss-sanitizer": "^2.0.0",
     "helmet": "^8.0.0",
     "hpp": "^0.2.3",
+    "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.11.0",
     "node-schedule": "^2.1.1",
@@ -39,4 +40,3 @@
     "supertest": "^7.1.0"
   }
 }
-
