@@ -51,7 +51,7 @@ exports.getBooking = async (req, res, next) => {
       select: "name province tel",
     });
     if (!booking) {
-      return res.status(500).json({
+      return res.status(400).json({
         success: false,
         message: `No Booking with the id of ${req.params.id}`,
       });
@@ -204,27 +204,3 @@ exports.deleteBooking = async (req, res, next) => {
       .json({ success: false, message: "Cannot delete Booking" });
   }
 };
-
-// Additional requirement
-const deleteExpiredBookings = async () => {
-  try {
-    const now = new Date();
-    const expiredBookings = await Booking.find({ apptDate: { $lt: now } });
-
-    if (expiredBookings.length > 0) {
-      await Booking.deleteMany({ apptDate: { $lt: now } });
-      console.log(`Deleted ${expiredBookings.length} expired bookings.`);
-    } else {
-      console.log("No expired bookings found.");
-    }
-  } catch (err) {
-    console.error("Error deleting expired bookings:", err);
-  }
-};
-// Set the function to run every day at 00:00.
-//
-
-if (process.env.NODE_ENV !== "test") {
-  schedule.scheduleJob("0 0 * * *", deleteExpiredBookings);
-}
-// Additional requirement
