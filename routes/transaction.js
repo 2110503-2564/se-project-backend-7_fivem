@@ -6,29 +6,8 @@ const {
 
 const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
-const { Parser } = require('json2csv');
-const Transaction = require('../models/Transaction');
+const { downloadTransactions } = require('../controllers/transaction');
 
-router.route('/download').get(protect, authorize('admin', 'user'), async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const data = await Transaction.find({ user: userId }).lean();
-
-    if (!data.length) {
-      return res.status(404).json({ error: 'No transactions found' });
-    }
-
-    const json2csv = new Parser();
-    const csv = json2csv.parse(data);
-
-    res.header('Content-Type', 'text/csv');
-    res.attachment('transactions.csv');
-    res.send(csv);
-  } catch (err) {
-    console.error('CSV export error:', err);
-    res.status(500).json({ error: 'CSV export failed' });
-  }
-});
 
 /**
  * @swagger
@@ -198,6 +177,10 @@ router.route('/download').get(protect, authorize('admin', 'user'), async (req, r
  *       scheme: bearer
  *       bearerFormat: JWT
  */
+
+
+router.route('/download')
+  .get(protect, authorize('admin', 'user'), downloadTransactions);
 
 router.route("/").get(protect, authorize("admin", "user"), getTransactions);
 router.route("/:id").get(protect, authorize("admin", "user"), getTransaction);
