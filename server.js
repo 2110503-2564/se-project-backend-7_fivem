@@ -71,6 +71,9 @@ const swaggerOptions = {
       {
         url: "http://localhost:5003/api/v1",
       },
+      {
+        url: "https://your-vercel-app-url.vercel.app/api/v1",
+      }
     ],
   },
   apis: ["./routes/*.js"],
