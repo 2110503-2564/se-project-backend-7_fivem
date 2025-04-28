@@ -33,20 +33,28 @@ exports.downloadTransactions = async (req, res) => {
 // @route   GET /api/v1/transactions/:id
 // @access  Private
 exports.getTransaction = async (req, res) => {
-  
-    const transaction = await Transaction.findOne({
-      _id: req.params.id,
-      user: req.user.id,
-    }).populate("booking campground paymentMethod");
+  try {
+    // If user is admin, don't filter by user ID. Otherwise, only show transactions belonging to the user
+    const query = req.user.role === "admin" 
+      ? { _id: req.params.id } 
+      : { _id: req.params.id, user: req.user.id };
+
+    const transaction = await Transaction.findOne(query).populate("booking campground paymentMethod");
 
     if (!transaction) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Transaction not found" });
+      return res.status(404).json({ 
+        success: false, 
+        error: "Transaction not found" 
+      });
     }
 
     res.status(200).json({ success: true, data: transaction });
-  
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: "Server error" 
+    });
+  }
 };
 
 // @desc    Get all transactions of the logged-in user (or all if admin)

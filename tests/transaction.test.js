@@ -106,6 +106,7 @@ describe("Transaction Routes", () => {
       paidAt: new Date(),
     });
     transactionId = transaction._id;
+    console.log(transactionId);
   });
 
   afterAll(async () => {
@@ -116,6 +117,63 @@ describe("Transaction Routes", () => {
     await User.deleteMany({});
     await mongoose.connection.close();
   });
+
+  describe("Download Transactions", () => {
+  
+    it("should return only user's transactions in CSV for regular user", async () => {
+      const res = await request(app)
+        .get("/api/v1/transaction/download")
+        .set("Authorization", `Bearer ${userToken}`);
+  
+      expect(res.statusCode).toBe(200);
+      const rows = res.text.split("\n");
+      // Header row + data row
+      expect(rows.length).toBe(2);
+      expect(res.text).toContain(userId.toString());
+    });
+  
+    it("should return 404 if no transactions found", async () => {
+      // Delete all transactions first
+      await Transaction.deleteMany({});
+  
+      const res = await request(app)
+        .get("/api/v1/transaction/download")
+        .set("Authorization", `Bearer ${userToken}`);
+  
+      expect(res.statusCode).toBe(404);
+      expect(res.body.error).toBe("No transactions found");
+  
+      // Recreate transaction for other tests
+      await Transaction.create({
+        user: userId,
+        booking: bookingId,
+        campground: campgroundId,
+        paymentMethod: paymentMethodId,
+        amount: testCampground.price,
+        status: "success",
+        paidAt: new Date(),
+      });
+    });
+  
+    it("should handle CSV export error", async () => {
+      // Mock Transaction.find to throw error
+      const originalFind = Transaction.find;
+      Transaction.find = jest.fn().mockImplementationOnce(() => {
+        throw new Error("DB error");
+      });
+  
+      const res = await request(app)
+        .get("/api/v1/transaction/download")
+        .set("Authorization", `Bearer ${adminToken}`);
+  
+      expect(res.statusCode).toBe(500);
+      expect(res.body.error).toBe("CSV export failed");
+  
+      // Restore original implementation
+      Transaction.find = originalFind;
+    });
+  });
+
   describe("GET /transaction", () => {
     
     it("should return 401 if not authenticated", async () => {
@@ -192,22 +250,7 @@ describe("Transaction Routes", () => {
     });
   });
 
-  describe("GET /transactions/:id", () => {
-
-    // jest.mock("../models/Transaction", () => ({
-    //   findOne: jest.fn().mockRejectedValue(new Error("Database error")),
-    // }));
-    
-    // describe("getTransaction - Error Handling", () => {
-    //   it("should return 400 if database operation fails", async () => {
-    //     const res = await request(app)
-    //       .get("/api/v1/transaction/invalid-id")
-    //       .set("Authorization", `Bearer ${userToken}`);
-    
-    //     expect(res.statusCode).toBe(400);
-    //     expect(res.body.success).toBe(false);
-    //   });
-    // });
+  describe("GET /transaction/:id", () => {
 
     it("should return 401 if not authenticated", async () => {
       const res = await request(app).get(
@@ -216,10 +259,46 @@ describe("Transaction Routes", () => {
       expect(res.statusCode).toBe(401);
     });
 
+
     it("should return transaction if user owns it", async () => {
+      console.log(`tx=`+transactionId);
+      console.log(`user=`+userToken);
+      console.log(`admin=`+adminToken);
+
+      const transaction = await Transaction.create({
+        user: userId,
+        booking: bookingId,
+        campground: campgroundId,
+        paymentMethod: paymentMethodId,
+        amount: testCampground.price,
+        status: "success",
+        paidAt: new Date(),
+      });
+      transactionId = transaction._id;
       const res = await request(app)
         .get(`/api/v1/transaction/${transactionId}`)
         .set("Authorization", `Bearer ${userToken}`);
+
+      console.log(res.body);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data._id).toBe(transactionId.toString());
+    });
+
+    it("should return transaction if admin owns it", async () => {
+      const transaction = await Transaction.create({
+        user: userId,
+        booking: bookingId,
+        campground: campgroundId,
+        paymentMethod: paymentMethodId,
+        amount: testCampground.price,
+        status: "success",
+        paidAt: new Date(),
+      });
+      transactionId = transaction._id;
+      const res = await request(app)
+        .get(`/api/v1/transaction/${transactionId}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.success).toBe(true);

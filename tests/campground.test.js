@@ -109,6 +109,7 @@ describe("Campground Controller", () => {
       const anotherCampground = await Campground.create({
         ...testCampground,
         name: "Another Campground",
+        tel: "5762834910",
         price: 500,
       });
       campgroundIds.push(anotherCampground._id);
@@ -126,6 +127,7 @@ describe("Campground Controller", () => {
         const campground = await Campground.create({
           ...testCampground,
           name: `Campground ${i}`,
+          tel: `${i}`
         });
         campgroundIds.push(campground._id);
       }
