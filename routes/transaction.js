@@ -6,6 +6,8 @@ const {
 
 const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
+const { downloadTransactions } = require('../controllers/transaction');
+
 
 /**
  * @swagger
@@ -175,6 +177,10 @@ const { protect, authorize } = require("../middleware/auth");
  *       scheme: bearer
  *       bearerFormat: JWT
  */
+
+
+router.route('/download')
+  .get(protect, authorize('admin', 'user'), downloadTransactions);
 
 router.route("/").get(protect, authorize("admin", "user"), getTransactions);
 router.route("/:id").get(protect, authorize("admin", "user"), getTransaction);
