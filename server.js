@@ -47,8 +47,8 @@ app.use(xss());
 
 //Rate Limiting
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 mins
-  max: 100,
+  windowMs: 60 * 1000, // 10 mins
+  max: 1000,
 });
 app.use(limiter);
 
@@ -73,7 +73,7 @@ const swaggerOptions = {
       },
       {
         url: "https://your-vercel-app-url.vercel.app/api/v1",
-      }
+      },
     ],
   },
   apis: ["./routes/*.js"],
