@@ -17,14 +17,6 @@ const {
  *        - name
  *        - address
  *      properties:
- *        id:
- *          type: string
- *          format: uuid
- *          description: The auto-generated id of the campground
- *          example: d290f1ee-6c54-4b01-90e6-d701748f0851
- *        ลำดับ:
- *          type: string
- *          description: Ordinal number
  *        name:
  *          type: string
  *          description: Campground name
@@ -46,16 +38,18 @@ const {
  *        region:
  *          type: string
  *          description: region
+ *        price:
+ *          type: number
+ *          description: price of campground
  *      example:
- *        id: 609bda561452242d88d36e37
- *        ลำดับ: 121
  *        name: Cozy Campground
  *        address: 121 ถ.สุขุมวิท
  *        district: บางนา
  *        province: กรุงเทพมหานคร
- *        postalcode: 10110
- *        tel: 02-2187000
+ *        postalcode: "10110"
+ *        tel: "0819236547"
  *        region: กรุงเทพมหานคร(Bangkok)
+ *        price: 2000
  */
 
 /**
@@ -112,6 +106,8 @@ const {
  *   post:
  *     summary: Create a new campground
  *     tags: [Campgrounds]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -135,7 +131,10 @@ const {
  *  put:
  *    summary: Update the campground by the id
  *    tags: [Campgrounds]
+ *    security:
+ *       - bearerAuth: []
  *    parameters:
+ * 
  *      - in: path
  *        name: id
  *        schema:
@@ -167,6 +166,8 @@ const {
  *  delete:
  *    summary: Remove the campground by id
  *    tags: [Campgrounds]
+ *    security:
+ *       - bearerAuth: []
  *    parameters:
  *      - in: path
  *        name: id
